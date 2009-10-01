@@ -31,10 +31,10 @@
 (defvar *models* '() "A list of symbols donating class-names that correspond to models.")
 
 (defclass model ()
-  ((model-id :initarg :oid :initform (get-next-id) :reader get-model-id)
+  ((model-id :initarg :oid :initform (get-next-id) :reader get-model-id :index t)
    (xrefs :initarg :xrefs :initform nil :accessor get-xrefs)
    (last-changed :initarg :last-changed :initform (get-universal-time)
-		 :accessor get-last-changed)
+		 :accessor get-last-changed :index t)
    (published :initarg :published :initform nil :accessor get-published))
   (:metaclass persistent-metaclass))
 

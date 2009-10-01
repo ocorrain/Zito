@@ -42,7 +42,7 @@
 	       (:file "images")
 	       (:file "text")
 	       (:file "html"))
-  :depends-on (:elephant :alexandria :closer-mop :cl-who))
+  :depends-on (:elephant :alexandria :closer-mop :cl-who :split-sequence))
 
 (defsystem :zito-test
   :components ((:module "test"

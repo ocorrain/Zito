@@ -15,7 +15,7 @@
        (render-slot 'html attr (slot-value instance attr) stream))))))
 
 (defun handle-post (instance parameters)
-  (dolist (attr (get-attributes (symbol-name (type-of object))))
+  (dolist (attr (get-attributes (symbol-name (type-of instance))))
     (handle-slot instance attr parameters)))
 
 (defmethod render-with-hint ((render-type (eql 'html)) hint label slot-name slot-value stream)
@@ -29,4 +29,33 @@
 		  (file (htm (:input :type "file" :name slot-name :id slot-name)))
 		  (t (error "Unknown hint spec: ~A" hint))))))))
 
- 
+(define-condition instance-not-found (error)
+  ((id :initarg :id :reader id)
+   (instance-class :initarg :class :reader instance-class)))
+
+(define-condition bad-request (error)
+  ((request-key :initarg :request-key :reader request-key)
+   (request-value :initarg :request-value :reader request-value)))
+
+(defun get-object-from-url (url)
+  (let ((sequence (split-sequence:split-sequence #\/ url :remove-empty-subseqs t)))
+    (if (= (length sequence) 3)
+	(destructuring-bind (node class-name instance-number)
+	    sequence
+	  (if (equal node "node")
+	      (let* ((class-symbol (intern (string-upcase class-name)))
+		     (class (ignore-errors (find-class class-symbol))))
+		(if class
+		    (let ((id (read-from-string instance-number)))
+		      (if (numberp id)
+			  (let ((instance (get-instance-by-value class 'model-id id)))
+			    (if instance
+				instance
+				(error 'instance-not-found :id id :class class-symbol)))
+			  (error 'bad-request :request-key "model-id" :request-value id)))
+		    (error 'bad-request :request-key "class-name" :request-value class-name)))
+	      (error 'bad-request :request-key "node-identifier" :request-value node)))
+	(error 'bad-request :request-key "url" :request-value url))))
+
+
+
