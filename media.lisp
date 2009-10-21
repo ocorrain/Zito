@@ -33,7 +33,8 @@
   ((file :handler #'handle-medium
 	 :render-hint 'file :attribute t)
    (last-upload)
-   (content-type :index t)))
+   (content-type :index t))
+  (:visible nil))
 
 (defgeneric handle-medium (object slot-name parameters)
   (:documentation "Handler for media objects (images, textfiles,

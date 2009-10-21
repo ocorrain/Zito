@@ -62,7 +62,10 @@
 
 (defgeneric render-slot (render-type slot-name slot-value stream))
 
-(defmacro define-model (name superclasses slot-definitions)
+(defvar *default-model-options* '(:visible t)
+  "Plist containing the default model options for every model.")
+
+(defmacro define-model (name superclasses slot-definitions &optional (model-options *default-model-options*))
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (prog1
 	 (defpclass ,name ,(if (some (lambda (super)
@@ -113,7 +116,8 @@
 					       (or (eq class-name 'model)
 						   (not (subtypep class-name 'model))))
 					     (mapcar #'class-name (cdr (class-precedence-list (find-class class-name))))))))))
-       (pushnew ',name *models*))))
+       (when (getf ',model-options :visible)
+	 (pushnew ',name *models*)))))
  
 
 

@@ -5,14 +5,27 @@
 	  (string-downcase (symbol-name (type-of object)))
 	  (get-model-id object)))
 
-(defun render-form (instance stream)
+(defun get-new-url (object)
+  (format nil "/new/~A" (string-downcase (symbol-name (type-of object)))))
+
+(defun render-form (instance stream &optional new)
   (with-html-output (s stream)
-    ((:form :action (get-url instance) :method :post :enctype "multipart/form-data")
+    ((:form :action (if new (get-new-url instance) (get-url instance))
+	    :method :post :enctype "multipart/form-data")
      (:input :type "hidden" :name "id" :value (get-model-id instance))
      (:fieldset (:legend (fmt "Editing ~A"
 			      (string-downcase (symbol-name (type-of instance)))))
 		(dolist (attr (get-attributes (type-of instance)))
-       (render-slot 'html attr (slot-value instance attr) stream))))))
+       (render-slot 'html attr (slot-value instance attr) stream)))
+     (:fieldset
+      ((:label :for "published")
+       (str "Publicly viewable?")
+       (if (get-published instance)
+	   (htm (:input :type "checkbox" :name "published" :id "published" :checked "yes"))
+	   (htm (:input :type "checkbox" :name "published" :id "published")))
+       (:input :type "submit" :value "Save")
+       (:input :type "reset" :value "Reset"))))))
+
 
 (defun handle-post (instance parameters)
   (dolist (attr (get-attributes (symbol-name (type-of instance))))
@@ -56,6 +69,21 @@
 		    (error 'bad-request :request-key "class-name" :request-value class-name)))
 	      (error 'bad-request :request-key "node-identifier" :request-value node)))
 	(error 'bad-request :request-key "url" :request-value url))))
+
+(defun get-new-object-type-from-url (url)
+  (let ((sequence (split-sequence:split-sequence #\/ url :remove-empty-subseqs t)))
+    (if (= (length sequence) 2)
+	(destructuring-bind (new class-name) sequence
+	  (if (equal new "new")
+	      (let* ((class-symbol (intern (string-upcase class-name)))
+		     (class (ignore-errors (find-class class-symbol))))
+		(if (and class (member class-symbol *models*))
+		    class-symbol
+		    (error 'bad-request :request-key "class-name" :request-value class-name)))
+	      (error 'bad-request :request-key "new-identifier" :request-value new)))
+	(error 'bad-request :request-key "url" :request-value url))))
+
+
 
 
 
