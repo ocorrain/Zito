@@ -50,7 +50,7 @@ universal time value if they are valid"
   (flet ((throw-bad-date-error (field value)
 	   (error 'bad-date :field field :value value :full (list date month year))))
     (let ((leap-year nil)
-	  (valid-date nil)
+ 	  (valid-date nil)
 	  (valid-month nil))
       (if (mod year 400)
 	  (setf leap-year t)
