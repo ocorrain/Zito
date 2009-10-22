@@ -39,6 +39,7 @@
   :components ((:file "packages")
                (:file "model")
 	       (:file "media")
+	       (:file "dates")
 	       (:file "images")
 	       (:file "text")
 	       (:file "html"))
