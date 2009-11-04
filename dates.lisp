@@ -30,7 +30,7 @@
 		    &key (date-label 'date) (month-label 'month)
 		    (year-label 'year))
   (flet ((grab-int (pname)
-	   (ignore-errors (parse-integer (assoc pname parameters)))))
+	   (ignore-errors (parse-integer (cdr (assoc pname parameters))))))
     (let ((date (grab-int date-label))
 	  (month (grab-int month-label))
 	  (year (grab-int year-label)))
@@ -42,7 +42,13 @@
 (define-condition bad-date (error)
   ((field :initarg :field :reader field)
    (value :initarg :value :initform nil :reader value)
-   (full :initarg :full :reader full)))
+   (full :initarg :full :reader full))
+  (:report (lambda (condition stream)
+	     (if (and (field condition) (value condition))
+		 (format stream "The value ~A is not valid for the field  ~A"
+			 (value condition) (field condition))
+		 (format stream "The date ~A is not valid" (full condition))))))
+
 
 (defun validate-date (date month year)
   "Takes integers DATE MONTH YEAR and returns them encoded as a
@@ -52,12 +58,13 @@ universal time value if they are valid"
     (let ((leap-year nil)
  	  (valid-date nil)
 	  (valid-month nil))
-      (if (mod year 400)
+      (if (zerop (mod year 400))
 	  (setf leap-year t)
-	  (if (mod year 100)
+	  (if (zerop (mod year 100))
 	      (setf leap-year nil)
-	      (if (mod year 4)
+	      (if (zerop (mod year 4))
 		  (setf leap-year t))))
+      (print leap-year)
       (if (<= 1 month 12)
 	  (progn
 	    (setf valid-month month)

@@ -44,11 +44,17 @@
 
 (define-condition instance-not-found (error)
   ((id :initarg :id :reader id)
-   (instance-class :initarg :class :reader instance-class)))
+   (instance-class :initarg :class :reader instance-class))
+  (:report (lambda (condition stream)
+	     (format stream "Instance with ID ~A and class ~A not found"
+		     (id condition) (instance-class condition)))))
 
 (define-condition bad-request (error)
   ((request-key :initarg :request-key :reader request-key)
-   (request-value :initarg :request-value :reader request-value)))
+   (request-value :initarg :request-value :reader request-value))
+  (:report (lambda (condition stream)
+	     (format stream "Bad request.  Key ~S. Value ~S"
+		     (request-key condition) (request-value condition)))))
 
 (defun get-object-from-url (url)
   (let ((sequence (split-sequence:split-sequence #\/ url :remove-empty-subseqs t)))
