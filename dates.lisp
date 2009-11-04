@@ -64,7 +64,6 @@ universal time value if they are valid"
 	      (setf leap-year nil)
 	      (if (zerop (mod year 4))
 		  (setf leap-year t))))
-      (print leap-year)
       (if (<= 1 month 12)
 	  (progn
 	    (setf valid-month month)
